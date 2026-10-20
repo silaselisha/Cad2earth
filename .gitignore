@@ -9,3 +9,7 @@
 libredwg/
 tools/
 __pycache__/
+
+# shipped examples
+!examples/sample.dxf
+!examples/sample.kmz

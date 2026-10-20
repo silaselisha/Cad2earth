@@ -1,51 +1,112 @@
 # dwg-to-kmz
 
-A [Claude Code](https://claude.com/claude-code) skill that converts AutoCAD drawings (DWG or DXF) into a KMZ that opens in Google Earth. It reprojects to WGS 84, turns closed outlines into polygons, keeps CAD layers as folders, and checks the result against Google Earth's import limits.
+[![test](https://github.com/silaselisha/dwg-to-kmz/actions/workflows/test.yml/badge.svg)](https://github.com/silaselisha/dwg-to-kmz/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Claude Code skill](https://img.shields.io/badge/Claude%20Code-skill-d97757)](https://docs.claude.com/en/docs/claude-code/skills)
 
-The pipeline uses only free, open-source tools:
+**Convert AutoCAD DWG / DXF drawings into a KMZ that opens correctly in Google Earth.** It uses free, open-source tools and runs as a [Claude Code](https://claude.com/claude-code) skill or as standalone scripts.
+
+Estate plans, field boundaries, irrigation layouts and survey drawings usually live in AutoCAD, in a projected coordinate system (UTM, Arc 1960…). Google Earth wants lon/lat KML. This tool:
+- finds the drawing's coordinate system;
+- reprojects the drawing;
+- turns closed outlines into real polygons named from their labels;
+- keeps each CAD layer as a folder;
+- styles everything;
+- checks the result fits Google Earth's import limits.
+
+![CAD drawing on the left, the converted KMZ on satellite imagery on the right](docs/demo.png)
 
 ```
-DWG ──LibreDWG dwg2dxf──▶ DXF ──GDAL + scripts/dxf2kmz.py──▶ KML ──zip──▶ KMZ
+DWG ──LibreDWG dwg2dxf──▶ DXF ──GDAL + dxf2kmz.py──▶ KML ──zip──▶ KMZ
 ```
 
-## Install
+## Features
 
-Clone the repo straight into your Claude Code skills folder:
+- **Finds the CRS for you:** reads the georeference embedded by Civil 3D (`UTM84-36S` → EPSG:32736), or takes `--epsg`. Includes notes on UTM zones and Arc 1960 vs WGS 84 for East Africa.
+- **Real polygons:** closed polylines become polygons with area in hectares, and hatches become filled areas. Contours, pipes and roads stay lines.
+- **Fixes messy drawings:** snaps boundaries drawn as separate pieces into one polygon (`--join-layers`). Removes duplicates, sheet frames, title blocks and dimensions, and repairs invalid polygons.
+- **Readable in Google Earth:** folders by theme → CAD layer, colours from the drawing, and labels as names. Block inserts (valves, pumps…) become symbols, and contours are hidden by default.
+- **Fits import limits:** simplifies invisibly (0.5 m) and warns above Google Earth's 250k-vertex / 10k-feature "Import as map features" limits.
+- **Honest report:** prints JSON covering:
+  - the source CRS and why it was chosen;
+  - features per layer;
+  - everything skipped or joined, and why;
+  - the WGS 84 bounding box;
+  - the vertex count.
+
+## Try it in one minute
+
+```bash
+git clone https://github.com/silaselisha/dwg-to-kmz.git && cd dwg-to-kmz
+bash scripts/qgis-python.sh scripts/dxf2kmz.py examples/sample.dxf sample.kmz --epsg 32736 --join-layers '^FARM BOUNDARY$'
+```
+
+Open `sample.kmz` in Google Earth: a made-up 1,400 ha estate near Kericho, Kenya. Or download [`examples/sample.kmz`](examples/sample.kmz) directly.
+
+## Install as a Claude Code skill
 
 ```bash
 git clone https://github.com/silaselisha/dwg-to-kmz.git ~/.claude/skills/dwg-to-kmz
 ```
 
-Start a new Claude Code session and ask, for example, *"convert Desktop/ESTATE BOUNDARIES.dwg to kmz"*. The skill loads on its own.
+Then, in any Claude Code session, ask, e.g., *"convert Desktop/ESTATE BOUNDARIES.dwg to kmz"*. Claude follows [SKILL.md](SKILL.md):
+1. inspect the drawing;
+2. work out the CRS;
+3. convert;
+4. verify the location on satellite imagery;
+5. report what could not be converted.
 
-## Requirements (Windows)
+## Requirements
 
-- **[QGIS](https://qgis.org)**: supplies GDAL, PROJ and a Python with `osgeo`. `scripts/qgis-python.sh` finds it under `C:\Program Files\QGIS *`.
-- **[LibreDWG](https://github.com/LibreDWG/libredwg)**: the portable Windows build (~12 MB). `scripts/get-libredwg.sh <dir>` downloads it.
-- Git Bash (for the `.sh` helpers).
+| | Windows | Debian / Ubuntu | macOS |
+|---|---|---|---|
+| GDAL + Python | [QGIS](https://qgis.org) (bundled) | `sudo apt install python3-gdal` | `brew install gdal && pip install gdal==$(gdal-config --version)` |
+| DWG → DXF | `bash scripts/get-libredwg.sh tools/libredwg` (portable download) | `sudo apt install libredwg-tools` | `brew install libredwg` |
+| Shell | Git Bash | bash | bash |
 
-## Using the scripts without Claude
+Only DXF input? You don't need LibreDWG.
+
+## Usage
 
 ```bash
-bash scripts/get-libredwg.sh tools/libredwg
-tools/libredwg/dwg2dxf.exe -y -o in.dxf in.dwg
-bash scripts/qgis-python.sh scripts/inspect_dxf.py in.dxf          # units, extents, embedded CRS, layers
-bash scripts/qgis-python.sh scripts/dxf2kmz.py in.dxf "Out.kmz" --kml \
-     [--epsg 32736] [--join-layers '^(Farm boundary.*)$']
+DWG2DXF=$(bash scripts/get-libredwg.sh tools/libredwg)       # Windows: downloads; Linux/macOS: finds it on PATH
+"$DWG2DXF" -y -o in.dxf in.dwg
+bash scripts/qgis-python.sh scripts/inspect_dxf.py in.dxf     # units, extents, embedded CRS, geometry per layer
+bash scripts/qgis-python.sh scripts/dxf2kmz.py in.dxf "Out.kmz" --kml
 ```
 
-`dxf2kmz.py` prints a JSON report. It covers:
-- the source CRS and where it came from;
-- feature counts per layer;
-- what was skipped or joined, and why;
-- the WGS 84 bounding box;
-- the vertex count, with a warning above Google Earth's 250k-vertex / 10k-feature limits for "Import as map features".
+| Option | Default | Purpose |
+|---|---|---|
+| `--epsg N` | from the drawing | source CRS (projected, metres) |
+| `--join-layers RE` | none | layers whose open pieces form one boundary ring |
+| `--snap M` | 40 | max gap (m) snapped when joining |
+| `--line-layers RE` | contour, pipe, road, stream… | closed shapes on these layers stay lines |
+| `--hidden-layers RE` | `0`, elevation, contours | exported but switched off |
+| `--skip-layers RE` | `Defpoints` | left out |
+| `--simplify M` / `--simplify-hidden M` | 0.5 / 2 | simplification in metres |
+| `--far M` | 100000 | drop details drawn far from the map (e.g. at the origin) |
+| `--kml` | off | also write the plain `.kml` |
 
-See [SKILL.md](SKILL.md) for the full procedure:
-- working out the coordinate system (embedded Civil 3D GEODATA, UTM zones, Arc 1960 vs WGS 84);
-- checking the result against satellite imagery;
-- pitfalls met in practice.
+## Opening the result
+
+- **Google Earth Pro:** File → **Open** (not Import).
+- **Google Earth web:** Projects → Import KML → "Import as map features". The report warns if the file is over the limits; otherwise use "Import as a data layer".
+- **QGIS, ArcGIS, Google My Maps** also read KMZ.
+
+## Limitations
+
+- LibreDWG can't decode every entity of every DWG. Very large polylines sometimes come out empty. The skill reports them by layer and handle. The free (not open-source) ODA File Converter is the fallback.
+- Drawings that aren't georeferenced (local grid, no CRS, millimetre units) need control points, which this tool doesn't do.
+
+## Contributing
+
+Issues and pull requests are welcome, especially:
+- sample drawings with other coordinate systems;
+- a pip-installable CLI;
+- support for block attributes.
+
+CI converts the sample drawing on every push (`examples/check_sample.py`).
 
 ## License
 
-MIT
+[MIT](LICENSE). LibreDWG is GPL and is downloaded separately, not bundled.

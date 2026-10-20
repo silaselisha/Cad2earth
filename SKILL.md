@@ -19,11 +19,15 @@ Scripts live next to this file in `scripts/`. Below, `$SK` means this skill's fo
 - Put downloaded tools in their own empty folder. Run Python that reads them or the drawing from a different folder.
 - If the user only has a DXF, skip step 2.
 
-## 1. Tools (Windows)
+## 1. Tools
 
-- **QGIS** provides GDAL, PROJ and a Python that has `osgeo`. Check with `ls "/c/Program Files" | grep -i qgis`. Always run Python through `bash $SK/scripts/qgis-python.sh script.py …`.
+- **GDAL with Python.** Always run Python through `bash $SK/scripts/qgis-python.sh script.py …`, which picks the right interpreter:
+  - Windows: QGIS provides GDAL, PROJ and a Python that has `osgeo`. Check with `ls "/c/Program Files" | grep -i qgis`.
+  - Linux/macOS: any `python3` that can `import osgeo` (`apt install python3-gdal` / `brew install gdal`).
   - Do **not** add `-I`: it ignores `PYTHONHOME`, and the interpreter dies with "No module named 'encodings'".
-- **LibreDWG**: run `bash $SK/scripts/get-libredwg.sh $W/libredwg`. It's a portable 12 MB zip from GitHub with no install.
+- **LibreDWG**: `DWG2DXF=$(bash $SK/scripts/get-libredwg.sh $W/libredwg)`. It prints the path of `dwg2dxf`:
+  - Windows: downloads the portable 12 MB zip from GitHub, no install.
+  - Linux/macOS: finds the packaged one (`apt install libredwg-tools` / `brew install libredwg`). Ask the user before installing it.
 - QGIS's own "Import DWG/DXF" and GDAL's `CAD` driver only read old DWG versions (R2000 and earlier). On newer files they silently produce an **empty** result.
   - Check the version with `head -c 6 file.dwg`. AC1032 = 2018, AC1027 = 2013, AC1024 = 2010, AC1015 = 2000.
   - Anything newer than AC1015 goes through LibreDWG.
@@ -32,8 +36,8 @@ Scripts live next to this file in `scripts/`. Below, `$SK` means this skill's fo
 ## 2. DWG → DXF
 
 ```bash
-$W/libredwg/dwglayers.exe $W/in.dwg                     # layer names: a first idea of what the drawing is
-$W/libredwg/dwg2dxf.exe -y -o $W/in.dxf $W/in.dwg       # "Unstable Class object" warnings are normal
+"$(dirname "$DWG2DXF")"/dwglayers* $W/in.dwg            # layer names: a first idea of what the drawing is
+"$DWG2DXF" -y -o $W/in.dxf $W/in.dwg                     # "Unstable Class object" warnings are normal
 ```
 
 ## 3. Work out the coordinate system before converting

@@ -1,0 +1,21 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  convert-sample:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GDAL
+        run: sudo apt-get update && sudo apt-get install -y python3-gdal
+      - name: Build the sample drawing
+        run: bash scripts/qgis-python.sh examples/make_sample.py /tmp/sample.dxf
+      - name: Inspect it
+        run: bash scripts/qgis-python.sh scripts/inspect_dxf.py /tmp/sample.dxf
+      - name: Convert DXF to KMZ
+        run: bash scripts/qgis-python.sh scripts/dxf2kmz.py /tmp/sample.dxf /tmp/sample.kmz --epsg 32736 --join-layers '^FARM BOUNDARY$'
+      - name: Check the KMZ
+        run: python3 examples/check_sample.py /tmp/sample.kmz
