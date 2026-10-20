@@ -1,0 +1,11 @@
+# drawings and outputs: never commit client data
+*.dwg
+*.dxf
+*.kml
+*.kmz
+*.gpkg
+*.json
+# downloaded tools
+libredwg/
+tools/
+__pycache__/
