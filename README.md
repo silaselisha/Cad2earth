@@ -1,6 +1,6 @@
-# dwg-to-kmz
+# Cad2earth
 
-[![test](https://github.com/silaselisha/dwg-to-kmz/actions/workflows/test.yml/badge.svg)](https://github.com/silaselisha/dwg-to-kmz/actions/workflows/test.yml)
+[![test](https://github.com/silaselisha/Cad2earth/actions/workflows/test.yml/badge.svg)](https://github.com/silaselisha/Cad2earth/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Claude Code skill](https://img.shields.io/badge/Claude%20Code-skill-d97757)](https://docs.claude.com/en/docs/claude-code/skills)
 
@@ -37,7 +37,7 @@ DWG ──LibreDWG dwg2dxf──▶ DXF ──GDAL + dxf2kmz.py──▶ KML ─
 ## Try it in one minute
 
 ```bash
-git clone https://github.com/silaselisha/dwg-to-kmz.git && cd dwg-to-kmz
+git clone https://github.com/silaselisha/Cad2earth.git && cd Cad2earth
 bash scripts/qgis-python.sh scripts/dxf2kmz.py examples/sample.dxf sample.kmz --epsg 32736 --join-layers '^FARM BOUNDARY$'
 ```
 
@@ -46,7 +46,7 @@ Open `sample.kmz` in Google Earth: a made-up 1,400 ha estate near Kericho, Kenya
 ## Install as a Claude Code skill
 
 ```bash
-git clone https://github.com/silaselisha/dwg-to-kmz.git ~/.claude/skills/dwg-to-kmz
+git clone https://github.com/silaselisha/Cad2earth.git ~/.claude/skills/cad2earth
 ```
 
 Then, in any Claude Code session, ask, e.g., *"convert Desktop/ESTATE BOUNDARIES.dwg to kmz"*. Claude follows [SKILL.md](SKILL.md):

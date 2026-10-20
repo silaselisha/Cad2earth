@@ -1,9 +1,9 @@
 ---
-name: dwg-to-kmz
+name: cad2earth
 description: Convert an AutoCAD drawing (DWG or DXF) into a KMZ that opens in Google Earth. Use when the user wants a .dwg/.dxf as KML or KMZ, wants CAD boundaries, estate/field/farm/zone plans or survey drawings shown in Google Earth or on a map, or says "convert to kmz", "dwg to kml", "dxf to kmz". Covers DWG→DXF with LibreDWG, finding the coordinate system, reprojecting to WGS 84, KML styling and folders, zipping to KMZ, and checking it fits Google Earth's import limits.
 ---
 
-# DWG → DXF → KML → KMZ
+# Cad2earth: DWG → DXF → KML → KMZ
 
 The pipeline, all free and open source:
 
@@ -11,7 +11,7 @@ The pipeline, all free and open source:
 2. **DXF → KML** with GDAL (bundled with QGIS) plus `scripts/dxf2kmz.py`. The script reprojects, builds polygons, styles the result and groups it into folders.
 3. **KML → KMZ**: a KMZ is just a zip whose main file is `doc.kml`. The script writes it directly; pass `--kml` to also keep the plain `.kml`.
 
-Scripts live next to this file in `scripts/`. Below, `$SK` means this skill's folder, for example `~/.claude/skills/dwg-to-kmz`, and `$W` means a scratch working folder.
+Scripts live next to this file in `scripts/`. Below, `$SK` means this skill's folder, for example `~/.claude/skills/cad2earth`, and `$W` means a scratch working folder.
 
 ## 0. Rules
 

@@ -75,7 +75,7 @@ mosaic = Image.new('RGB', ((tx1 - tx0 + 1) * 256, (ty1 - ty0 + 1) * 256))
 for tx in range(tx0, tx1 + 1):
     for ty in range(ty0, ty1 + 1):
         url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/%d/%d/%d' % (z, ty, tx)
-        req = urllib.request.Request(url, headers={'User-Agent': 'dwg-to-kmz demo renderer'})
+        req = urllib.request.Request(url, headers={'User-Agent': 'Cad2earth demo renderer'})
         mosaic.paste(Image.open(io.BytesIO(urllib.request.urlopen(req, timeout=30).read())).convert('RGB'),
                      ((tx - tx0) * 256, (ty - ty0) * 256))
 
@@ -103,7 +103,7 @@ a2.set_xlim(mx0, mx1); a2.set_ylim(my0, my1); a2.set_aspect('equal'); a2.axis('o
 a2.set_title('sample.kmz  (Google Earth, WGS 84)', color='#e8eaed', fontsize=11)
 a2.text(0.99, 0.01, 'Imagery: Esri, Maxar, Earthstar Geographics', transform=a2.transAxes, ha='right', va='bottom',
         color='white', fontsize=6, alpha=0.8)
-fig.text(0.5, 0.02, 'dwg-to-kmz:  boundary pieces snapped into one polygon, fields named from their labels, '
+fig.text(0.5, 0.02, 'Cad2earth:  boundary pieces snapped into one polygon, fields named from their labels, '
          'sheet frame dropped, contours hidden by default', ha='center', color='#9aa0a6', fontsize=9)
 plt.tight_layout(rect=(0, 0.04, 1, 1))
 fig.savefig(out, facecolor=fig.get_facecolor())
