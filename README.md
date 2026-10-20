@@ -1,8 +1,13 @@
-# Cad2earth
+<h1 align="center">Cad2earth</h1>
 
-[![test](https://github.com/silaselisha/Cad2earth/actions/workflows/test.yml/badge.svg)](https://github.com/silaselisha/Cad2earth/actions/workflows/test.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Claude Code skill](https://img.shields.io/badge/Claude%20Code-skill-d97757)](https://docs.claude.com/en/docs/claude-code/skills)
+<p align="center"><b>AutoCAD drawings → Google Earth, in one step.</b><br>
+DWG / DXF in, a clean, georeferenced KMZ out.</p>
+
+<p align="center">
+  <a href="https://github.com/silaselisha/Cad2earth/actions/workflows/test.yml"><img src="https://github.com/silaselisha/Cad2earth/actions/workflows/test.yml/badge.svg" alt="test"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://docs.claude.com/en/docs/claude-code/skills"><img src="https://img.shields.io/badge/Claude%20Code-skill-d97757" alt="Claude Code skill"></a>
+</p>
 
 **Convert AutoCAD DWG / DXF drawings into a KMZ that opens correctly in Google Earth.** It uses free, open-source tools and runs as a [Claude Code](https://claude.com/claude-code) skill or as standalone scripts.
 
